@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+ <h2>Task Manager</h2>
+
+<input id="title" placeholder="Title">
+<input id="desc" placeholder="Description">
+<input type="date" id="date">
+
+<select id="priority">
+  <option>High</option>
+  <option>Medium</option>
+  <option>Low</option>
+</select>
+
+<button onclick="addTask()">Add</button>
+
+<br><br>
+
+<select onchange="filterTask(this.value)">
+  <option value="all">All</option>
+  <option>High</option>
+  <option>Medium</option>
+  <option>Low</option>
+</select>
+<input id="search" placeholder="Search" oninput="searchTask()">
+
+<div id="list"></div>
+
+<script>
+
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let edit = -1;
+
+// show tasks
+function show(data = tasks){
+  list.innerHTML = "";
+
+  for(let i=0; i<data.length; i++){
+    let t = data[i];
+
+    list.innerHTML +=
+      "<b>" + t.title + "</b> (" + t.priority + ")<br>" +
+      t.desc + " - " + t.date + "<br>" +
+      "<button onclick='editTask("+i+")'>Edit</button>" +
+      "<button onclick='deleteTask("+i+")'>Delete</button><hr>";
+  }
+}
+// add  update
+function addTask(){
+  let t = title.value;
+  let d = desc.value;
+  let da = date.value;
+  let p = priority.value;
+
+  if(t=="" | da==""){
+    alert("Fill title & date");
+    return;
+  }
+
+  if(edit == -1){
+    tasks.push({title:t, desc:d, date:da, priority:p});
+  } else {
+    tasks[edit] = {title:t, desc:d, date:da, priority:p};
+    edit = -1;
+  }
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  clear();
+  show();
+}
+
+// edit
+function editTask(i){
+  let t = tasks[i];
+  title.value = t.title;
+  desc.value = t.desc;
+  date.value = t.date;
+  priority.value = t.priority;
+  edit = i;
+}
+
+// delete
+function deleteTask(i){
+  tasks.splice(i,1);
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  show();
+}
+
+// filter
+function filterTask(p){
+  if(p=="all") show();
+  else show(tasks.filter(x => x.priority == p));
+}
+
+// search
+function searchTask(){
+  let s = search.value.toLowerCase();
+  show(tasks.filter(x => x.title.toLowerCase().includes(s)));
+}
+
+// clear 
+function clear(){
+  title.value="";
+  desc.value="";
+  date.value="";
+}
+
+show();
+</script>
+</body>
+</html>
